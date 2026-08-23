@@ -70,24 +70,12 @@
         .quality-badge.disabled { opacity: 0.4; pointer-events: none; }
         .quality-container { min-height: 80px; }
         .quality-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: block; }
-        .progress-wrapper { display: none; }
-        .progress-wrapper.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .progress-custom { height: 8px; border-radius: 4px; background: var(--bg); overflow: hidden; }
-        .progress-bar-custom { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 0.3s ease; position: relative; }
-        .progress-bar-custom::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        .status-text { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem; }
-        .status-text.success { color: var(--success); }
-        .status-text.error { color: var(--error); }
         .video-preview { display: none; }
         .video-preview.active { display: block; animation: fadeIn 0.3s ease; }
         .video-preview img { border-radius: 12px; width: 100%; max-height: 200px; object-fit: cover; }
         .video-preview h5 { margin-top: 0.75rem; font-weight: 600; word-break: break-word; }
         .video-preview .meta { color: var(--text-muted); font-size: 0.875rem; }
         .platform-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; background: rgba(99, 102, 241, 0.2); color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.3); }
-        .download-btn { display: none; width: 100%; }
-        .download-btn.active { display: block; animation: fadeIn 0.3s ease; }
         .footer { border-top: 1px solid var(--border); padding: 2rem 0; color: var(--text-muted); }
         .supported-sites { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; justify-content: center; }
         .site-badge { background: var(--bg); border: 1px solid var(--border); padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.75rem; color: var(--text-muted); transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.35rem; }
@@ -95,9 +83,12 @@
         .toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999; }
         .toast-custom { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem 1.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.3); animation: slideIn 0.3s ease; min-width: 280px; }
         @keyframes slideIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
-        .spin { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 576px) { .hero { padding: 2.5rem 0; } .option-card { padding: 1rem; } .quality-badge { font-size: 0.7rem; padding: 0.25rem 0.65rem; } }
+        
+        /* New Magic Widget Box Style */
+        #magicWidgetBox { display: none; text-align: center; border: 2px dashed var(--primary); background: rgba(99, 102, 241, 0.05); }
+        #magicWidgetBox.active { display: block; animation: fadeIn 0.4s ease; }
     </style>
 </head>
 <body>
@@ -122,7 +113,7 @@
                     <div class="card-custom p-4 p-md-5 mb-4">
                         <div class="input-group-custom mb-4">
                             <i class="bi bi-link-45deg input-icon"></i>
-                            <input type="url" class="form-control" id="urlInput" placeholder="Paste video/music URL here (YouTube, Instagram, TikTok, Twitter/X, Facebook, Vimeo, SoundCloud, Reddit, etc.)" autocomplete="off">
+                            <input type="url" class="form-control" id="urlInput" placeholder="Paste video/music URL here (YouTube, Instagram, TikTok, etc.)" autocomplete="off">
                         </div>
 
                         <div class="mb-4">
@@ -148,20 +139,16 @@
                         </div>
 
                         <button class="btn btn-primary-custom w-100 btn-lg" id="downloadBtn" onclick="startDownload()" disabled>
-                            <span id="btnText"><i class="bi bi-cloud-arrow-down-fill me-2"></i>Start Download</span>
-                            <span id="btnLoading" class="d-none"><i class="bi bi-arrow-clockwise spin me-2"></i>Processing...</span>
+                            <span id="btnText"><i class="bi bi-cloud-arrow-down-fill me-2"></i>Generate Download Link</span>
                         </button>
                     </div>
 
-                    <div class="progress-wrapper card-custom p-4" id="progressWrapper">
-                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                            <span class="fw-medium" id="progressTitle">Preparing download...</span>
-                            <span class="fw-bold text-primary" id="progressPercent">0%</span>
-                        </div>
-                        <div class="progress-custom">
-                            <div class="progress-bar-custom" id="progressBar" style="width: 0%"></div>
-                        </div>
-                        <div class="status-text" id="statusText">Initializing...</div>
+                    <!-- Magic Iframe Box (Replaced Backend Progress Bar) -->
+                    <div id="magicWidgetBox" class="card-custom p-4 mt-3">
+                        <h5 class="text-success mb-2"><i class="bi bi-check-circle-fill me-2"></i>Link Generated Successfully!</h5>
+                        <p class="text-muted mb-4" style="font-size: 0.9rem;">Click the download button below to save your file directly.</p>
+                        <!-- Iframe will be injected here -->
+                        <div id="iframeContainer" style="min-height: 65px;"></div>
                     </div>
 
                     <div class="video-preview card-custom p-4 mt-3" id="videoPreview">
@@ -174,16 +161,12 @@
                             </div>
                         </div>
                     </div>
-
-                    <button class="btn btn-success w-100 btn-lg mt-3 download-btn" id="downloadFileBtn" onclick="downloadFile()">
-                        <i class="bi bi-download me-2"></i>Download File
-                    </button>
                 </div>
             </div>
 
             <footer class="footer mt-5">
                 <div class="container text-center">
-                    <p class="mb-2">AnMusic Downloader • Supports 1000+ sites via yt-dlp</p>
+                    <p class="mb-2">AnMusic Downloader • Fast, Free & Errorless!</p>
                     <div class="supported-sites" id="supportedSites"></div>
                 </div>
             </footer>
@@ -194,36 +177,29 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        let currentDownloadId = null;
         let selectedFormat = 'video';
-        let selectedQuality = 'best';
-        let statusPollInterval = null;
+        let selectedQuality = '720';
         let availableVideoQualities = [];
         let availableAudioQualities = [];
         let currentPlatform = null;
 
         const urlInput = document.getElementById('urlInput');
         const downloadBtn = document.getElementById('downloadBtn');
-        const progressWrapper = document.getElementById('progressWrapper');
-        const progressBar = document.getElementById('progressBar');
-        const progressPercent = document.getElementById('progressPercent');
-        const statusText = document.getElementById('statusText');
-        const progressTitle = document.getElementById('progressTitle');
         const videoPreview = document.getElementById('videoPreview');
         const previewThumb = document.getElementById('previewThumb');
         const previewTitle = document.getElementById('previewTitle');
         const previewMeta = document.getElementById('previewMeta');
         const previewMetaTop = document.getElementById('previewMetaTop');
-        const downloadFileBtn = document.getElementById('downloadFileBtn');
-        const btnText = document.getElementById('btnText');
-        const btnLoading = document.getElementById('btnLoading');
         const videoQualitiesContainer = document.getElementById('videoQualities');
         const audioQualitiesContainer = document.getElementById('audioQualities');
         const supportedSitesContainer = document.getElementById('supportedSites');
+        const magicWidgetBox = document.getElementById('magicWidgetBox');
+        const iframeContainer = document.getElementById('iframeContainer');
 
         urlInput.addEventListener('input', debounce(async () => {
             const url = urlInput.value.trim();
             downloadBtn.disabled = !isValidUrl(url);
+            magicWidgetBox.classList.remove('active');
             
             if (isValidUrl(url)) {
                 await fetchVideoInfo(url);
@@ -244,16 +220,14 @@
 
         async function fetchVideoInfo(url) {
             try {
+                // Info preview feature will still use your backend, but if it fails, the user can still download!
                 const res = await fetch(`/api/info?url=${encodeURIComponent(url)}`);
-                if (!res.ok) {
-                    const err = await res.json();
-                    return;
-                }
+                if (!res.ok) return;
                 const data = await res.json();
                 showPreview(data);
                 renderQualities(data);
             } catch (e) {
-                console.log('Info fetch failed:', e);
+                console.log('Info fetch failed, but download will still work:', e);
             }
         }
 
@@ -262,12 +236,11 @@
                 const res = await fetch('/api/platforms');
                 const data = await res.json();
                 renderSupportedSites(data.platforms);
-            } catch (e) {
-                console.log('Failed to load platforms:', e);
-            }
+            } catch (e) {}
         }
 
         function renderSupportedSites(platforms) {
+            if(!platforms) return;
             supportedSitesContainer.innerHTML = platforms.map(p => 
                 `<span class="site-badge"><i class="bi ${p.icon}"></i>${p.name}</span>`
             ).join('');
@@ -277,48 +250,37 @@
             availableVideoQualities = data.video_qualities || [];
             availableAudioQualities = data.audio_qualities || [];
             currentPlatform = data.platform;
-
             renderVideoQualities();
             renderAudioQualities();
         }
 
         function renderVideoQualities() {
             if (availableVideoQualities.length === 0) {
-                videoQualitiesContainer.innerHTML = '<span class="quality-label">No video qualities available for this content</span>';
+                videoQualitiesContainer.innerHTML = '<span class="quality-label">Standard Qualities Available</span>';
                 return;
             }
-
             const badges = availableVideoQualities.map(q => 
                 `<span class="quality-badge video" data-quality="${q.height}" onclick="event.stopPropagation(); selectQuality('${q.height}')">${q.label}</span>`
             ).join('');
-
             videoQualitiesContainer.innerHTML = `<span class="quality-label">${availableVideoQualities.length} video qualities available</span>${badges}`;
             
-            if (selectedFormat === 'video') {
-                const firstQuality = availableVideoQualities[0];
-                if (firstQuality && !availableVideoQualities.some(q => q.height.toString() === selectedQuality)) {
-                    selectQuality(firstQuality.height.toString());
-                }
+            if (selectedFormat === 'video' && availableVideoQualities.length > 0) {
+                selectQuality(availableVideoQualities[0].height.toString());
             }
         }
 
         function renderAudioQualities() {
             if (availableAudioQualities.length === 0) {
-                audioQualitiesContainer.innerHTML = '<span class="quality-label">No audio qualities available for this content</span>';
+                audioQualitiesContainer.innerHTML = '<span class="quality-label">Standard Audio Available</span>';
                 return;
             }
-
             const badges = availableAudioQualities.map(q => 
                 `<span class="quality-badge audio" data-quality="${q.abr}" onclick="event.stopPropagation(); selectQuality('${q.abr}')">${q.label}</span>`
             ).join('');
-
             audioQualitiesContainer.innerHTML = `<span class="quality-label">${availableAudioQualities.length} audio qualities available</span>${badges}`;
             
-            if (selectedFormat === 'audio') {
-                const firstQuality = availableAudioQualities[0];
-                if (firstQuality && !availableAudioQualities.some(q => q.abr.toString() === selectedQuality)) {
-                    selectQuality(firstQuality.abr.toString());
-                }
+            if (selectedFormat === 'audio' && availableAudioQualities.length > 0) {
+                selectQuality(availableAudioQualities[0].abr.toString());
             }
         }
 
@@ -327,13 +289,11 @@
             audioQualitiesContainer.innerHTML = '<span class="quality-label">Enter URL to load qualities</span>';
             availableVideoQualities = [];
             availableAudioQualities = [];
-            currentPlatform = null;
         }
 
         function showPreview(data) {
             if (data.thumbnail) previewThumb.src = data.thumbnail;
             previewTitle.textContent = data.title || 'Unknown Title';
-            
             const duration = data.duration ? formatDuration(data.duration) : 'Unknown duration';
             const uploader = data.uploader || 'Unknown uploader';
             
@@ -341,41 +301,19 @@
             if (currentPlatform && currentPlatform !== 'unknown') {
                 previewMetaTop.innerHTML = `<span class="platform-badge"><i class="bi bi-${getPlatformIcon(currentPlatform)} me-1"></i>${capitalize(currentPlatform)}</span>`;
             }
-            
             previewMeta.innerHTML = `<i class="bi bi-clock me-1"></i>${duration} • <i class="bi bi-person me-1"></i>${uploader}`;
-            
             videoPreview.classList.add('active');
         }
 
         function getPlatformIcon(platform) {
-            const icons = {
-                'youtube': 'youtube',
-                'instagram': 'instagram',
-                'tiktok': 'tiktok',
-                'twitter': 'twitter-x',
-                'facebook': 'facebook',
-                'vimeo': 'vimeo',
-                'soundcloud': 'soundcloud',
-                'reddit': 'reddit',
-                'twitch': 'twitch',
-                'dailymotion': 'camera-video',
-                'bilibili': 'camera-video',
-            };
+            const icons = {'youtube': 'youtube', 'instagram': 'instagram', 'tiktok': 'tiktok', 'twitter': 'twitter-x', 'facebook': 'facebook'};
             return icons[platform] || 'globe';
         }
 
-        function capitalize(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        function hidePreview() {
-            videoPreview.classList.remove('active');
-        }
-
+        function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+        function hidePreview() { videoPreview.classList.remove('active'); }
         function formatDuration(seconds) {
-            const h = Math.floor(seconds / 3600);
-            const m = Math.floor((seconds % 3600) / 60);
-            const s = seconds % 60;
+            const h = Math.floor(seconds / 3600), m = Math.floor((seconds % 3600) / 60), s = seconds % 60;
             return h > 0 ? `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}` : `${m}:${s.toString().padStart(2,'0')}`;
         }
 
@@ -385,35 +323,17 @@
                 card.classList.toggle('selected', card.dataset.type === type);
                 card.querySelector('input').checked = card.dataset.type === type;
             });
-            
             updateQualityBadges(type);
         }
 
         function updateQualityBadges(type) {
             document.querySelectorAll('.quality-badge').forEach(badge => {
-                badge.classList.toggle('disabled', false);
-                if ((type === 'video' && badge.classList.contains('video')) || 
-                    (type === 'audio' && badge.classList.contains('audio'))) {
-                    badge.style.opacity = '1';
-                    badge.style.pointerEvents = 'auto';
+                if ((type === 'video' && badge.classList.contains('video')) || (type === 'audio' && badge.classList.contains('audio'))) {
+                    badge.style.opacity = '1'; badge.style.pointerEvents = 'auto'; badge.classList.remove('disabled');
                 } else {
-                    badge.style.opacity = '0.4';
-                    badge.style.pointerEvents = 'none';
-                    badge.classList.add('disabled');
+                    badge.style.opacity = '0.4'; badge.style.pointerEvents = 'none'; badge.classList.add('disabled');
                 }
             });
-
-            if (type === 'video' && availableVideoQualities.length > 0) {
-                const firstQuality = availableVideoQualities[0];
-                if (firstQuality && !availableVideoQualities.some(q => q.height.toString() === selectedQuality)) {
-                    selectQuality(firstQuality.height.toString());
-                }
-            } else if (type === 'audio' && availableAudioQualities.length > 0) {
-                const firstQuality = availableAudioQualities[0];
-                if (firstQuality && !availableAudioQualities.some(q => q.abr.toString() === selectedQuality)) {
-                    selectQuality(firstQuality.abr.toString());
-                }
-            }
         }
 
         function selectQuality(quality) {
@@ -423,117 +343,42 @@
             });
         }
 
-        async function startDownload() {
+        // --- NEW MAGIC DOWNLOAD FUNCTION ---
+        function startDownload() {
             const url = urlInput.value.trim();
             if (!isValidUrl(url)) return showToast('Please enter a valid URL', 'error');
 
-            downloadBtn.disabled = true;
-            btnText.classList.add('d-none');
-            btnLoading.classList.remove('d-none');
-            hidePreview();
-            downloadFileBtn.classList.remove('active');
-            progressWrapper.classList.add('active');
-            progressTitle.textContent = 'Starting download...';
-            statusText.textContent = 'Connecting to server...';
-            progressBar.style.width = '0%';
-            progressPercent.textContent = '0%';
-            statusText.className = 'status-text';
-
-            try {
-                const formData = new FormData();
-                formData.append('url', url);
-                formData.append('format_type', selectedFormat);
-                formData.append('quality', selectedQuality);
-
-                const res = await fetch('/api/download', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.detail || 'Download failed');
-
-                currentDownloadId = data.download_id;
-                startStatusPolling();
-            } catch (err) {
-                showToast(err.message, 'error');
-                resetDownloadButton();
-                progressWrapper.classList.remove('active');
-            }
-        }
-
-        function startStatusPolling() {
-            statusPollInterval = setInterval(async () => {
-                if (!currentDownloadId) return;
-                
-                try {
-                    const res = await fetch(`/api/status/${currentDownloadId}`);
-                    const data = await res.json();
-
-                    progressBar.style.width = `${data.progress}%`;
-                    progressPercent.textContent = `${data.progress}%`;
-
-                    if (data.status === 'downloading') {
-                        statusText.textContent = `Downloading... ${data.progress}%`;
-                    } else if (data.status === 'completed') {
-                        statusText.textContent = 'Download complete! Preparing file...';
-                        statusText.className = 'status-text success';
-                        progressTitle.textContent = 'Ready to download';
-                        clearInterval(statusPollInterval);
-                        downloadFileBtn.classList.add('active');
-                        resetDownloadButton();
-                    } else if (data.status === 'failed') {
-                        statusText.textContent = `Failed: ${data.error || 'Unknown error'}`;
-                        statusText.className = 'status-text error';
-                        clearInterval(statusPollInterval);
-                        showToast(data.error || 'Download failed', 'error');
-                        resetDownloadButton();
-                    }
-                } catch (e) {
-                    console.error('Status poll error:', e);
-                }
-            }, 1000);
-        }
-
-        async function downloadFile() {
-            if (!currentDownloadId) return;
+            let formatId = '720'; // Default video quality
             
-            try {
-                const res = await fetch(`/api/download-file/${currentDownloadId}`);
-                if (!res.ok) throw new Error('Download failed');
-                
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = '';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                
-                showToast('Download started!', 'success');
-            } catch (err) {
-                showToast(err.message, 'error');
+            if (selectedFormat === 'audio') {
+                formatId = 'mp3';
+            } else {
+                // Map the quality selected by user
+                let q = selectedQuality.toString();
+                if(q.includes('2160') || q.includes('4k')) formatId = '4k';
+                else if(q.includes('1440')) formatId = '1440';
+                else if(q.includes('1080')) formatId = '1080';
+                else if(q.includes('720')) formatId = '720';
+                else if(q.includes('480')) formatId = '480';
+                else if(q.includes('360')) formatId = '360';
+                else formatId = '720';
             }
-        }
 
-        function resetDownloadButton() {
-            downloadBtn.disabled = false;
-            btnText.classList.remove('d-none');
-            btnLoading.classList.add('d-none');
+            // Hide old stuff, show magic box
+            hidePreview();
+            magicWidgetBox.classList.add('active');
+            
+            // Inject the loader.to iframe
+            iframeContainer.innerHTML = `<iframe style="width:100%; max-width:350px; height:60px; border:0; overflow:hidden;" scrolling="no" src="https://loader.to/api/button/?url=${encodeURIComponent(url)}&f=${formatId}"></iframe>`;
+            
+            showToast('Download link generated!', 'success');
         }
 
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = 'toast-custom';
-            toast.innerHTML = `
-                <div class="d-flex align-items-center gap-2">
-                    <i class="bi ${type === 'success' ? 'bi-check-circle-fill text-success' : type === 'error' ? 'bi-x-circle-fill text-danger' : 'bi-info-circle-fill text-primary'}"></i>
-                    <span>${message}</span>
-                </div>
-            `;
+            toast.innerHTML = `<div class="d-flex align-items-center gap-2"><i class="bi ${type === 'success' ? 'bi-check-circle-fill text-success' : type === 'error' ? 'bi-x-circle-fill text-danger' : 'bi-info-circle-fill text-primary'}"></i><span>${message}</span></div>`;
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 4000);
         }
@@ -546,7 +391,6 @@
             };
         }
 
-        // Load supported sites on page load
         loadSupportedSites();
     </script>
 </body>
