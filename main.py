@@ -61,6 +61,7 @@ def get_platform_from_url(url: str) -> str:
 def get_ydl_opts(format_type: str, quality: str, output_path: str, platform: str = 'unknown'):
     """Configure yt-dlp options based on format, quality and platform."""
     base_opts = {
+        'cookiefile': 'cookies.txt',
         'outtmpl': output_path,
         'noplaylist': True,
         'quiet': True,
@@ -313,6 +314,7 @@ async def get_video_info(url: str):
     """Get video info without downloading - supports all platforms."""
     try:
         ydl_opts = {
+            'cookiefile': 'cookies.txt',
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
