@@ -22,12 +22,10 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")
 
 active_downloads = {}
 
-
 class DownloadRequest(BaseModel):
     url: str
     format_type: str = "video"
     quality: str = "best"
-
 
 def get_platform_from_url(url: str) -> str:
     """Detect platform from URL."""
@@ -57,11 +55,9 @@ def get_platform_from_url(url: str) -> str:
     else:
         return 'unknown'
 
-
 def get_ydl_opts(format_type: str, quality: str, output_path: str, platform: str = 'unknown'):
     """Configure yt-dlp options based on format, quality and platform."""
     base_opts = {
-        'cookiefile': 'cookies.txt',
         'outtmpl': output_path,
         'noplaylist': True,
         'quiet': True,
@@ -80,10 +76,13 @@ def get_ydl_opts(format_type: str, quality: str, output_path: str, platform: str
         },
     }
 
+    # API and Android Client Bypasses
     if platform == 'instagram':
         base_opts['extractor_args'] = {'instagram': {'api': 'graphql'}}
     elif platform == 'twitter':
         base_opts['extractor_args'] = {'twitter': {'api': 'graphql'}}
+    elif platform == 'youtube':
+        base_opts['extractor_args'] = {'youtube': {'client': ['android', 'ios']}}
     
     if format_type == "audio":
         base_opts.update({
@@ -116,13 +115,18 @@ def get_ydl_opts(format_type: str, quality: str, output_path: str, platform: str
     
     return base_opts
 
-
 async def download_video(download_id: str, url: str, format_type: str, quality: str):
     """Background task to download video."""
     try:
-        active_downloads[download_id] = {"status": "downloading", "progress": 0, "filename": None, "title": None}
+        active_downloads[download_id] = {
+            "status": "downloading", 
+            "progress": 0, 
+            "filename": None, 
+            "title": None,
+            "ext": "mp3" if format_type == "audio" else "mp4"
+        }
         
-        output_template = str(DOWNLOAD_DIR / f"{download_id}_%(title).100s.%(ext)s")
+        output_template = str(DOWNLOAD_DIR / f"{download_id}.%(ext)s")
         platform = get_platform_from_url(url)
         ydl_opts = get_ydl_opts(format_type, quality, output_template, platform)
         
@@ -148,7 +152,7 @@ async def download_video(download_id: str, url: str, format_type: str, quality: 
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, lambda: _download_sync(url, ydl_opts))
         
-        files = list(DOWNLOAD_DIR.glob(f"{download_id}_*"))
+        files = list(DOWNLOAD_DIR.glob(f"{download_id}.*"))
         if files:
             active_downloads[download_id]["status"] = "completed"
             active_downloads[download_id]["progress"] = 100
@@ -160,12 +164,10 @@ async def download_video(download_id: str, url: str, format_type: str, quality: 
     except Exception as e:
         active_downloads[download_id] = {"status": "failed", "error": str(e), "progress": 0}
 
-
 def _download_sync(url: str, ydl_opts: dict):
     """Synchronous download function."""
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
-
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
@@ -173,7 +175,6 @@ async def index(request: Request):
     with open(html_path, "r", encoding="utf-8") as f:
         html_content = f.read()
     return HTMLResponse(content=html_content)
-
 
 @app.post("/api/download")
 async def start_download(
@@ -186,13 +187,11 @@ async def start_download(
     background_tasks.add_task(download_video, download_id, url, format_type, quality)
     return {"download_id": download_id, "status": "started"}
 
-
 @app.get("/api/status/{download_id}")
 async def get_status(download_id: str):
     if download_id not in active_downloads:
         raise HTTPException(status_code=404, detail="Download not found")
     return active_downloads[download_id]
-
 
 @app.get("/api/download-file/{download_id}")
 async def download_file(download_id: str):
@@ -207,12 +206,22 @@ async def download_file(download_id: str):
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="File not found")
     
+    # Safe Filename with strict .mp4 or .mp3 extension
+    raw_title = download.get("title", "AnMusic_Video")
+    clean_title = re.sub(r'[^\w\s-]', '', raw_title).strip()
+    if not clean_title:
+        clean_title = f"AnMusic_{download_id}"
+        
+    ext = download.get("ext", "mp4")
+    final_name = f"{clean_title}.{ext}"
+    
+    media_type = 'audio/mpeg' if ext == 'mp3' else 'video/mp4'
+    
     return FileResponse(
         path=file_path,
-        filename=download["filename"],
-        media_type='application/octet-stream'
+        filename=final_name,
+        media_type=media_type
     )
-
 
 def extract_all_video_qualities(formats: List[Dict]) -> List[Dict]:
     """Extract all unique video qualities from formats."""
@@ -261,7 +270,6 @@ def extract_all_video_qualities(formats: List[Dict]) -> List[Dict]:
     
     return sorted_qualities
 
-
 def extract_all_audio_qualities(formats: List[Dict]) -> List[Dict]:
     """Extract all unique audio qualities from formats."""
     qualities = {}
@@ -308,20 +316,18 @@ def extract_all_audio_qualities(formats: List[Dict]) -> List[Dict]:
     
     return sorted_qualities
 
-
 @app.get("/api/info")
 async def get_video_info(url: str):
     """Get video info without downloading - supports all platforms."""
     try:
         ydl_opts = {
-            'cookiefile': 'cookies.txt',
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
             'noplaylist': True,
             'ignoreerrors': False,
             'extractor_args': {
-                'youtube': {'skip': []},
+                'youtube': {'client': ['android', 'ios']},
                 'instagram': {'api': 'graphql'},
                 'twitter': {'api': 'graphql'},
             },
@@ -366,7 +372,6 @@ async def get_video_info(url: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-
 @app.get("/api/platforms")
 async def get_supported_platforms():
     """Return list of supported platforms."""
@@ -388,8 +393,8 @@ async def get_supported_platforms():
         ]
     }
 
-
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
+    
