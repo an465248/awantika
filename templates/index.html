@@ -143,12 +143,12 @@
                         </button>
                     </div>
 
-                    <!-- Magic Iframe Box (Replaced Backend Progress Bar) -->
+                    <!-- Magic Iframe Box -->
                     <div id="magicWidgetBox" class="card-custom p-4 mt-3">
                         <h5 class="text-success mb-2"><i class="bi bi-check-circle-fill me-2"></i>Link Generated Successfully!</h5>
                         <p class="text-muted mb-4" style="font-size: 0.9rem;">Click the download button below to save your file directly.</p>
                         <!-- Iframe will be injected here -->
-                        <div id="iframeContainer" style="min-height: 65px;"></div>
+                        <div id="iframeContainer" style="min-height: 80px; width: 100%;"></div>
                     </div>
 
                     <div class="video-preview card-custom p-4 mt-3" id="videoPreview">
@@ -220,7 +220,6 @@
 
         async function fetchVideoInfo(url) {
             try {
-                // Info preview feature will still use your backend, but if it fails, the user can still download!
                 const res = await fetch(`/api/info?url=${encodeURIComponent(url)}`);
                 if (!res.ok) return;
                 const data = await res.json();
@@ -348,28 +347,15 @@
             const url = urlInput.value.trim();
             if (!isValidUrl(url)) return showToast('Please enter a valid URL', 'error');
 
-            let formatId = '720'; // Default video quality
-            
-            if (selectedFormat === 'audio') {
-                formatId = 'mp3';
-            } else {
-                // Map the quality selected by user
-                let q = selectedQuality.toString();
-                if(q.includes('2160') || q.includes('4k')) formatId = '4k';
-                else if(q.includes('1440')) formatId = '1440';
-                else if(q.includes('1080')) formatId = '1080';
-                else if(q.includes('720')) formatId = '720';
-                else if(q.includes('480')) formatId = '480';
-                else if(q.includes('360')) formatId = '360';
-                else formatId = '720';
-            }
+            // Set Format (MP3 for Audio, MP4 for Video)
+            let formatId = (selectedFormat === 'audio') ? 'mp3' : 'mp4';
 
             // Hide old stuff, show magic box
             hidePreview();
             magicWidgetBox.classList.add('active');
             
-            // Inject the loader.to iframe
-            iframeContainer.innerHTML = `<iframe style="width:100%; max-width:350px; height:60px; border:0; overflow:hidden;" scrolling="no" src="https://loader.to/api/button/?url=${encodeURIComponent(url)}&f=${formatId}"></iframe>`;
+            // Inject the Vevioz iframe (Faster and bypasses blocks)
+            iframeContainer.innerHTML = `<iframe style="width:100%; max-width:100%; height:80px; border:0; overflow:hidden; border-radius:8px;" scrolling="no" src="https://api.vevioz.com/api/button/${formatId}/${encodeURIComponent(url)}"></iframe>`;
             
             showToast('Download link generated!', 'success');
         }
