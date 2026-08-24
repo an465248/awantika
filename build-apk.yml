@@ -1,0 +1,24 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build TWA APK using PWABuilder CLI
+        run: |
+          npm install -g @pwabuilder/pwabuilder-cli
+          pwabuilder generate-app --manifest ./twa-manifest.json
+          
