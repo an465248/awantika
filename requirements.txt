@@ -1,6 +1,6 @@
 fastapi
 uvicorn
 yt-dlp
-python-multipart
+3.11.9
 jinja2
 aiofiles
