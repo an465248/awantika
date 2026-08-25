@@ -1,0 +1,6 @@
+{
+  "name": "AnMusic Downloader",
+  "description": "4K Video and HD Audio Downloader from YouTube, Instagram, TikTok, Twitter/X, and 1000+ platforms with built-in player and downloads manager.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
